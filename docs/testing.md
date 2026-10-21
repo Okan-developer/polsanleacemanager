@@ -1,6 +1,7 @@
 # Testing
 
-> **Template — filled during bootstrap.**
+> Bootstrap'ta dolduruldu (2026-10-19). Aşağıdaki "Frameworks & layout" ve "What must be tested"
+> projeye özeldir; diğer bölümler ANEW sözleşmesidir.
 
 ## The contract
 - Every acceptance criterion maps to at least one test (criterion ↔ test map lives in the plan).
@@ -8,10 +9,35 @@
 - The whole suite runs inside `scripts/check` — one command, everywhere.
 
 ## Frameworks & layout
-<!-- Test framework(s), where tests live, naming pattern. -->
+- **xUnit v3** + **AwesomeAssertions**; `dotnet test` (VSTest modu, `--filter` ile kategori seçimi).
+- Her test sınıfı tam olarak bir kategori taşır: `[Trait("Category", "Unit" | "Architecture" | "Integration" | "E2E")]`.
+  Hızlı/tam ayrımı bu **seçiciyle** yapılır (Two speeds, kural 4): fast = `Category=Unit|Category=Architecture`,
+  tam profildeki ek adım = `Category!=Unit&Category!=Architecture`. Kategorisiz bir test bu yüzden yine çalışır (tam profilde).
+
+| Kategori | Nerede | Ne | Profil |
+|---|---|---|---|
+| Unit | `tests/PolsanLeaveManager.<Module>.Tests` | Domain ve Application; DB yok, `TimeProvider` sahte | fast |
+| Architecture | `tests/PolsanLeaveManager.Architecture.Tests` | NetArchTest ile A1–A6 (`docs/architecture.md`) | fast |
+| Integration | `tests/PolsanLeaveManager.<Module>.Tests` | **Testcontainers.PostgreSql** ile gerçek PostgreSQL; EF eşleme, migration, sorgu | tam |
+| E2E | `tests/PolsanLeaveManager.E2E.Tests` | **Playwright for .NET**, Blazor üzerinden kritik akışlar | tam |
+
+- **Tam profil Docker ister**: Integration testleri çalışan bir Docker daemon'u (Docker Desktop)
+  gerektirir. Docker yoksa tam check **kırmızı** olur; bu testler atlanmaz (Protected-tests rule).
+- **App-under-test yaşam döngüsü E2E fixture'ına aittir**: fixture, Web host'u `WebApplicationFactory`/Kestrel
+  ile process içinde rastgele bir portta başlatır, PostgreSQL container'ını ve tarayıcıyı açar, test
+  bitince (hata ve timeout dahil) hepsini dispose eder. Tarayıcı headless çalışır; E2E assembly'sinde
+  paralellik kapalıdır (tek worker). Dev server, `dotnet watch` ve `dotnet run` check'e girmez.
+- Kimlik: testlerde yalnızca test ortamında açık olan sahte kimlik şeması kullanılır (`docs/security.md`).
 
 ## What must be tested
-<!-- e.g. every business rule (BR-n), every boundary/forbidden dependency, critical flows E2E/smoke. -->
+- Her iş kuralı (**BR-n**, `docs/domain.md`) için en az bir Unit test; metot `[Trait("Rule", "BR-n")]` taşır.
+  Sınır değerleri zorunludur (ör. BR-1 için kıdem 4/5/14/15, BR-2 için yaş 18/50, BR-5 için hafta sonu/arife).
+- Her domain değişmezi (geçersiz durum geçişi, negatif bakiye, append-only defter) için Unit test.
+- Her yasak bağımlılık (A1–A6) için bir Architecture test.
+- Her modülün kalıcılığı için en az bir Integration test (gerçek PostgreSQL üzerinde kaydet → oku).
+- Yetkilendirme kuralları (çalışan yalnızca kendi talebi, yönetici yalnızca ekibi, İK herkesi)
+  Application katmanında Unit, API üzerinden Integration test ile.
+- Kritik akış E2E: talep oluştur → yönetici onaylar → bakiye düşer; ve ret akışı.
 
 ## Protected-tests rule
 Weakening asserts, deleting, or skipping tests to reach green is forbidden. A red test triggers

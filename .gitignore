@@ -14,3 +14,12 @@ Thumbs.db
 
 # Claude Code personal settings (shared settings.json IS committed after init)
 .claude/settings.local.json
+
+# .NET build output and tooling
+bin/
+obj/
+TestResults/
+.vs/
+*.user
+*.suo
+playwright-report/
