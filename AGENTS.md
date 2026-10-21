@@ -1,15 +1,15 @@
 # AGENTS.md — Project Rules
 
-> **STATUS: NOT CONFIGURED.** This workspace has not been adapted to a project yet.
-> The only correct first action is the bootstrap workflow (`workflows/bootstrap.md`).
-> Until bootstrap completes and rewrites this file, do not write application code.
+> **PolsanLeaveManager** — Polsan çalışan izin yönetimi: talep → doğrudan yönetici onayı → hareket
+> defterinden türetilen bakiye (4857 s. İş Kanunu md.53). .NET 10 modüler monolit (Organization ·
+> Leave · Calendar · Web/Blazor), PostgreSQL, OIDC; GitHub PR. Neden: `docs/decisions/0001-*`.
 
 ## Operating mode
 
-**Mode: unset** — bootstrap sets `lite` or `strict` (`workflows/README.md`); every workflow honors its gates.
+**Mode: lite** — set at bootstrap (`workflows/README.md`); every workflow honors its gates.
 **Start work** with `/new-feature` in lite (it chains the segments and asks at each gate) or with
 `/analyze` in strict (one segment per role). Segment commands always stop (`workflows/segments.md`).
-**Language: unset** — bootstrap sets `chat=<xx> · docs=<xx>`; protocol fields stay English (`docs/conventions.md`).
+**Language: chat=tr · docs=tr** — set at bootstrap; protocol fields stay English (`docs/conventions.md`).
 
 ## Invariant rules (these survive bootstrap — never delete or weaken them)
 
